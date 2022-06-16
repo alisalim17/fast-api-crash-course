@@ -1,24 +1,12 @@
-from ctypes import Union
-from typing import Optional
-from fastapi import Body, FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI
+from schema import schema
+from starlette.graphql import GraphQLApp
 
 app = FastAPI()
 
-
-@app.get("/")
-async def root():
-    return {"message": "Hi this is route named 'index'"}
+app.add_route('/graphql', GraphQLApp(schema=schema))
 
 
-
-class CreatePostInput(BaseModel):
-    name: str
-    published:bool = True
-    rating:Optional[int | str]
-
-
-@app.post("/create-post")
-async def create_post(payload:CreatePostInput):
-    print(payload)
-    return {"message": f"Hi,my name is {payload.name}"}
+@app.get('/')
+async def index():
+    return {"message": "Yo"}
