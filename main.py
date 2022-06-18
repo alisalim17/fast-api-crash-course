@@ -1,12 +1,32 @@
-from fastapi import FastAPI
-from schema import schema
-from starlette.graphql import GraphQLApp
+from ariadne.asgi import GraphQL
+from ariadne import ObjectType, make_executable_schema
 
-app = FastAPI()
+type_defs = """
+    type Query {
+        hello: String!
+        user: User
+    }
 
-app.add_route('/graphql', GraphQLApp(schema=schema))
+    type User {
+        username: String!
+    }
+"""
+
+query = ObjectType("Query")
 
 
-@app.get('/')
-async def index():
-    return {"message": "Yo"}
+@query.field("user")
+def resolve_user(_, info):
+    return {"first_name": "Jake", "last_name": "Paul"}
+
+
+user = ObjectType("User")
+
+
+@user.field("username")
+def resolve_username(obj, *_):
+    return f'{obj["first_name"]} {obj["last_name"]}'
+
+
+schema = make_executable_schema(type_defs, query, user)
+app = GraphQL(schema, debug=True)
