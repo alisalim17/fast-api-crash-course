@@ -2,6 +2,8 @@ from calendar import Calendar
 from ariadne.asgi import GraphQL
 from ariadne import ObjectType, make_executable_schema
 from ariadne import MutationType
+from fastapi import FastAPI
+import uvicorn
 
 type_defs = """
     type User {
@@ -69,4 +71,9 @@ def get_context_value(request):
 
 
 schema = make_executable_schema(type_defs, query, mutation, user)
-app = GraphQL(schema, context_value=get_context_value, debug=True)
+graphql_app = GraphQL(schema, context_value=get_context_value, debug=True)
+
+app = FastAPI()
+app.add_route("/graphql", graphql_app)
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=4000)
